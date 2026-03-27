@@ -44,6 +44,38 @@ npm run build
 
 ## Deployment
 
+### Vercel Deployment
+
+This app uses React Router SSR (`ssr: true`), so deploy it as a Node.js server app on Vercel.
+
+1. Push your repository to GitHub/GitLab/Bitbucket.
+2. In Vercel, click **Add New Project** and import this repository.
+3. In project settings, keep these defaults (or set them explicitly):
+   - Framework Preset: **Other** (or the auto-detected React Router preset if shown)
+   - Install Command: `npm install`
+   - Build Command: `npm run build`
+   - Output Directory: leave empty
+4. Add environment variable in Vercel:
+   - `VITE_GOOGLE_CLIENT_ID` = your Google OAuth Web Client ID
+5. Deploy.
+
+After deployment, add your Vercel domain in Google Cloud Console OAuth settings:
+
+- Authorized JavaScript origins: `https://your-project.vercel.app`
+- Authorized redirect URIs: if your flow requires them
+
+For local development, create `.env` from `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Windows PowerShell alternative:
+
+```powershell
+Copy-Item .env.example .env
+```
+
 ### Docker Deployment
 
 To build and run using Docker:

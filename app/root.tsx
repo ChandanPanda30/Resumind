@@ -6,7 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { GoogleOAuthProvider} from "@react-oauth/google";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { Route } from "./+types/root";
 import { useEffect } from "react";
 import { usePuterStore } from "~/lib/puter";
@@ -27,9 +27,9 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { init } = usePuterStore();
-    useEffect(() => {
-        init();
-    }, [init]);
+  useEffect(() => {
+    init();
+  }, [init]);
 
   return (
     <html lang="en">
@@ -40,8 +40,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-      <script src="https://js.puter.com/v2/"></script>
-      {children}
+        <script src="https://js.puter.com/v2/"></script>
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -49,12 +49,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-const clientId = "79532774279-q8pkjtd39degg7chqetgk3ulg003lb5e.apps.googleusercontent.com";
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 export default function App() {
+  if (!clientId) {
+    console.warn("Missing VITE_GOOGLE_CLIENT_ID environment variable");
+  }
+
   return (
-      <GoogleOAuthProvider clientId={clientId}>
-          <Outlet />
-      </GoogleOAuthProvider>);
+    <GoogleOAuthProvider clientId={clientId}>
+      <Outlet />
+    </GoogleOAuthProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

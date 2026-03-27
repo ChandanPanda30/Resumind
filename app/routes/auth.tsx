@@ -28,14 +28,13 @@ const Auth = () => {
     const { isLoading , auth  } = usePuterStore()
     const googleLoginSuccess = usePuterStore(s => s.auth.googleLoginSuccess);
     const googleLoginError = usePuterStore(s => s.auth.googleLoginError);
-    const greeting = getGreeting();
     const location = useLocation();
     const next = location.search.split('next=')[1];
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if(!isLoading && auth.isAuthenticated) navigate(next || '/');
-    }, [auth.isAuthenticated , next ]);
+    // useEffect(() => {
+    //     if(!isLoading && auth.isAuthenticated) navigate(next || '/');
+    // }, [auth.isAuthenticated , next ]);
 
     return (
         <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex items-center justify-center">
