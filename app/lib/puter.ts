@@ -175,10 +175,29 @@ export const usePuterStore = create<PuterStore>((set, get) => {
 
   const signOut = () => {
     googleLogout();
+
+    // Clear app-specific local cache so each sign-in starts fresh.
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+
+      if (
+        key === "googleCredential" ||
+        key === "puterConnected" ||
+        key.startsWith("paid:")
+      ) {
+        keysToRemove.push(key);
+      }
+    }
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
     localStorage.removeItem("googleCredential");
+
     set((state) => ({
       ...state,
       auth: { ...state.auth, user: null, isAuthenticated: false },
+      error: null,
     }));
   };
 
