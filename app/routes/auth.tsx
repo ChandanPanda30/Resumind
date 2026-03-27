@@ -40,14 +40,15 @@ const Auth = () => {
             <h1 id={"greeting"}>{greeting}</h1>
             <h2>Log into Continue Your Job Journey</h2>
           </div>
-          <section className={" gap-2"}>
-            <div className={"pb-2"}>
+          <section className={"flex flex-col items-center gap-2"}>
+            <div className={"pb-2 flex justify-center w-full"}>
               {!auth.isAuthenticated && (
                 <GoogleLogin
                   theme="outline"
                   size="large"
                   shape="pill"
                   text="signin_with"
+                  width="300"
                   onSuccess={(res) => {
                     if (res.credential) {
                       googleLoginSuccess(res.credential); // update Zustand store!

@@ -13,26 +13,35 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { kv } = usePuterStore();
+  const { kv, auth, isLoading } = usePuterStore();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
 
   useEffect(() => {
+    if (isLoading) return;
+    if (!auth.isAuthenticated) {
+      setResumes([]); // Clear data if not authenticated
+      return;
+    }
+
     const loadResumes = async () => {
       setLoadingResumes(true);
-
-      const resumes = (await kv.list("resume:*", true)) as KVItem[];
-
-      const parsedResumes = resumes?.map(
-        (resume) => JSON.parse(resume.value) as Resume,
-      );
-
-      setResumes(parsedResumes || []);
-      setLoadingResumes(false);
+      try {
+        const resumes = (await kv.list("resume:*", true)) as KVItem[];
+        const parsedResumes = resumes?.map(
+          (resume) => JSON.parse(resume.value) as Resume,
+        );
+        setResumes(parsedResumes || []);
+      } catch (e) {
+        console.error("Failed to load resumes", e);
+        setResumes([]);
+      } finally {
+        setLoadingResumes(false);
+      }
     };
 
     loadResumes();
-  }, []);
+  }, [auth.isAuthenticated, isLoading, kv]);
 
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">

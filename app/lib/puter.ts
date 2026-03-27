@@ -176,29 +176,61 @@ export const usePuterStore = create<PuterStore>((set, get) => {
   const signOut = () => {
     googleLogout();
 
-    // Clear app-specific local cache so each sign-in starts fresh.
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i);
-      if (!key) continue;
-
-      if (
-        key === "googleCredential" ||
-        key === "puterConnected" ||
-        key.startsWith("paid:")
-      ) {
-        keysToRemove.push(key);
-      }
-    }
-
-    keysToRemove.forEach((key) => localStorage.removeItem(key));
-    localStorage.removeItem("googleCredential");
-
+    // Update app auth state immediately for UX.
     set((state) => ({
       ...state,
       auth: { ...state.auth, user: null, isAuthenticated: false },
       error: null,
     }));
+
+    // Best-effort cleanup of Puter storage/session in the background.
+    void (async () => {
+      const puter = getPuter();
+      if (puter) {
+        try {
+          const entries = (await puter.fs.readdir("./")) ?? [];
+          const deleteJobs = entries
+            .filter((entry) => !entry.is_dir)
+            .map((entry) => puter.fs.delete(entry.path));
+          await Promise.allSettled(deleteJobs);
+        } catch {
+          // Ignore cleanup errors during sign-out.
+        }
+
+        try {
+          await puter.kv.flush();
+        } catch {
+          // Ignore cleanup errors during sign-out.
+        }
+
+        try {
+          await (puter as any).auth?.signOut?.();
+        } catch {
+          // Ignore cleanup errors during sign-out.
+        }
+      }
+
+      // Clear app-specific local cache so each sign-in starts fresh.
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+
+        if (
+          key === "googleCredential" ||
+          key === "puterConnected" ||
+          key.startsWith("paid:")
+        ) {
+          keysToRemove.push(key);
+        }
+      }
+
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      localStorage.removeItem("googleCredential");
+
+      // Refresh the page
+      window.location.reload();
+    })();
   };
 
   const write = async (path: string, data: string | File | Blob) => {
