@@ -27,7 +27,8 @@ export default function Home() {
     const loadResumes = async () => {
       setLoadingResumes(true);
       try {
-        const resumes = (await kv.list("resume:*", true)) as KVItem[];
+        const sub = auth.user?.sub || "anonymous";
+        const resumes = (await kv.list(`resume:${sub}:*`, true)) as KVItem[];
         const parsedResumes = resumes?.map(
           (resume) => JSON.parse(resume.value) as Resume,
         );
