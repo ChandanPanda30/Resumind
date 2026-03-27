@@ -4,6 +4,7 @@ import {usePuterStore} from "~/lib/puter";
 import Summary from "~/components/Summary";
 import ATS from "~/components/ATS";
 import Details from "~/components/Details";
+import CompanySuggestions from '~/components/CompanySuggestions';
 
 export const meta = () => ([
     { title: "Resumemind | Review" },
@@ -16,11 +17,23 @@ const Resume = () => {
     const[imageUrl , setImageUrl] = useState('');
     const[resumeUrl , setResumeUrl] = useState('');
     const[feedback , setFeedback] = useState<Feedback | null>(null);
+    const [isPaid, setIsPaid] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         if(!isLoading && !auth.isAuthenticated) navigate(`/auth?next=/resume/${id}`);
     }, [auth.isAuthenticated , isLoading , id]);
+
+    useEffect(() => {
+        setIsPaid(localStorage.getItem(`paid:${id}`) === "true");
+    }, [id]);
+
+    const companies = feedback?.suggestedCompanies ?? [
+        "Improve your Resume , to be noticed by companies"
+    ];
+    const handlePayClick = () => {
+        navigate(`/payment/${id}`);
+    };
 
     useEffect(() => {
         const loadResume = async() => {
@@ -56,8 +69,8 @@ const Resume = () => {
                     <span className={"text-gray-800 text-sm font-semibold"}>Back to Homepage</span>
                 </Link>
             </nav>
-            <div className={"flex flex-row w-full max-lg:flex-col-reverse"}>
-                <section className={"feedback-section bg-[url('/images/bg-small.svg') bg-cover h-[100vh] sticky top-0 items-center justify-center"}>
+            <div className={"flex flex-row w-full max-lg:flex-col"}>
+                <section className={"feedback-section bg-[url('/images/bg-small.svg') bg-cover h-auto lg:h-[100vh] lg:sticky lg:top-0 items-center justify-center"}>
                     {imageUrl && resumeUrl && (
                         <div className={"animate-in fade-in duration-1000 gradient-border max-sm:m-0 h-[100%] max-wxl:h-fit w-fit"}>
                             <a href={resumeUrl} target={"_blank"} rel={"noreferrer noopener"}>
@@ -76,6 +89,11 @@ const Resume = () => {
                         <div className={"flex flex-col gap-8 animate-in fade-in duration-1000"}>
                             <Summary feedback={feedback}/>
                             <ATS score={feedback.ATS.score || 0} suggestions={feedback.ATS.tips || []}/>
+                            <CompanySuggestions
+                                companies={companies}
+                                isPaid={isPaid}
+                                onPayClick={handlePayClick}
+                            />
                             <Details feedback={feedback}/>
                         </div>
                     ):(
